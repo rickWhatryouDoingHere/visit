@@ -1,6 +1,7 @@
 document.getElementById('getUniverseId').addEventListener('click', async () => {
     const placeId = document.getElementById('placeId').value;
-    const universeResponse = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
+    const universeResponse = await fetch(`https://cors-anywhere.herokuapp.com/https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
+    
     const universeData = await universeResponse.json();
 
     if (universeData && universeData.id) {
@@ -13,7 +14,7 @@ document.getElementById('getUniverseId').addEventListener('click', async () => {
 });
 
 async function fetchLiveVisits(universeId) {
-    const visitsResponse = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
+    const visitsResponse = await fetch(`https://cors-anywhere.herokuapp.com/https://games.roblox.com/v1/games?universeIds=${universeId}`);
     const visitsData = await visitsResponse.json();
     
     if (visitsData && visitsData.data.length > 0) {
@@ -26,7 +27,7 @@ async function fetchLiveVisits(universeId) {
 }
 
 async function updateLiveVisits(universeId) {
-    const visitsResponse = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
+    const visitsResponse = await fetch(`https://cors-anywhere.herokuapp.com/https://games.roblox.com/v1/games?universeIds=${universeId}`);
     const visitsData = await visitsResponse.json();
     
     if (visitsData && visitsData.data.length > 0) {
