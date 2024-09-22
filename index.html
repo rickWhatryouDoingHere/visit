@@ -3,85 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Live Player Count</title>
+    <title>Roblox Live Visitor Count</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            text-align: center;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 200px;
-        }
-
-        button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .result {
-            margin-top: 20px;
-        }
+        /* Your CSS styles here */
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Roblox Live Player Count</h1>
-        <input type="text" id="placeIdInput" placeholder="Enter Place ID" />
-        <button id="fetchButton">Get Player Count</button>
-        <div id="result" class="result"></div>
+        <h1>Roblox Live Visitor Count</h1>
+        <p>Enter a Roblox game's place ID to see its current visitor count.</p>
+        <input type="text" id="placeId" placeholder="Enter Place ID">
+        <button id="getVisitorCount">Get Visitor Count</button>
+        <div id="result" class="hidden">
+            <h2>Visitor Count: <span id="visitorCount"></span></h2>
+            <p>Data retrieved from Roblox API.</p>
+        </div>
     </div>
+
     <script>
-        document.getElementById('fetchButton').addEventListener('click', async () => {
-            const placeId = document.getElementById('placeIdInput').value;
-            const universeResponse = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`, {
-                method: 'GET',
-                headers: { 'accept': 'application/json' }
-            });
-            
-            if (!universeResponse.ok) {
-                document.getElementById('result').innerText = 'Invalid Place ID. Please try again.';
+        const placeIdInput = document.getElementById('placeId');
+        const getVisitorCountButton = document.getElementById('getVisitorCount');
+        const resultDiv = document.getElementById('result');
+        const visitorCountSpan = document.getElementById('visitorCount');
+
+        // Embed Node.js logic using a script tag
+        const express = require('express');
+        const cors = require('cors');
+
+        const app = express();
+        app.use(cors());
+
+        // Proxy endpoint to forward requests to the Roblox API
+        app.get('/api/*', async (req, res) => {
+            const targetUrl = `https://${req.url.slice(5)}`; // Remove '/api/' prefix
+
+            try {
+                const response = await fetch(targetUrl);
+                res.json(await response.json());
+            } catch (error) {
+                console.error(error);
+                res.status(500).send('Internal Server Error');
+            }
+        });
+
+        // Start the Node.js server
+        app.listen(3000, () => {
+            console.log('Server listening on port 3000');
+        });
+
+        // Fetch data from the Node.js server
+        async function fetchVisitorCount(placeId) {
+            const response = await fetch(`http://localhost:3000/api/games?universeIds=${placeId}`);
+            const data = await response.json();
+            return data.data[0].playing;
+        }
+
+        getVisitorCountButton.addEventListener('click', async () => {
+            const placeId = placeIdInput.value;
+            if (!placeId) {
+                alert('Please enter a valid place ID.');
                 return;
             }
 
-            const universeData = await universeResponse.json();
-            const universeId = universeData.id;
-
-            const playerCountResponse = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`, {
-                method: 'GET',
-                headers: { 'accept': 'application/json' }
-            });
-
-            const playerCountData = await playerCountResponse.json();
-            const playingCount = playerCountData.data[0].playing;
-
-            document.getElementById('result').innerText = `Current Players Online: ${playingCount}`;
+            try {
+                const visitorCount = await fetchVisitorCount(placeId);
+                visitorCountSpan.textContent = visitorCount;
+                resultDiv.classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred. Please try again later.');
+            }
         });
     </script>
 </body>
