@@ -3,120 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Visit Counter</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 50px;
-        }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-        .counter {
-            font-size: 5em;
-            color: #333;
-            transition: transform 0.5s ease-in-out;
-        }
-        .counter.animate {
-            transform: scale(1.2);
-        }
-        .button {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            background-color: #ff6600;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        input {
-            font-size: 1.2em;
-            padding: 10px;
-            margin-top: 20px;
-        }
-    </style>
+    <title>Roblox Live Visit Count</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Roblox Universe Visit Counter</h1>
-    <div id="counter" class="counter">Loading...</div>
-    
-    <input id="universeIdInput" type="text" placeholder="Enter Universe ID" />
-    <button class="button" onclick="updateCounter()">Get Visit Count</button>
-    
-    <br/><br/>
-    <input id="placeIdInput" type="text" placeholder="Enter Place ID (Number In Game Url)" />
-    <button class="button" onclick="getUniverseIdFromPlace()">Get Universe ID</button>
-
-    <br/><br/>
-    <button class="button" onclick="quickView()">Quick View - Universe ID: 903807016</button>
-
-    <script>
-        let intervalId;
-        const counterElement = document.getElementById('counter');
-
-        // Function to fetch visit count
-        async function fetchVisits(universeId) {
-            try {
-                const response = await fetch(`/api/getVisits?universeId=${universeId}`);
-                const data = await response.json();
-                return data.visits;
-            } catch (error) {
-                console.error("Error fetching visits:", error);
-            }
-        }
-
-        // Function to update counter
-        async function updateCounter() {
-            const universeId = document.getElementById('universeIdInput').value;
-            if (universeId) {
-                const visits = await fetchVisits(universeId);
-                if (visits) {
-                    counterElement.innerText = visits.toLocaleString();
-                    counterElement.classList.add('animate');
-                    setTimeout(() => counterElement.classList.remove('animate'), 1000);
-                }
-            }
-        }
-
-        // Auto-update counter every 5 seconds
-        function startCounterUpdates(universeId) {
-            if (intervalId) clearInterval(intervalId);
-            intervalId = setInterval(async () => {
-                const visits = await fetchVisits(universeId);
-                if (visits) {
-                    counterElement.innerText = visits.toLocaleString();
-                    counterElement.classList.add('animate');
-                    setTimeout(() => counterElement.classList.remove('animate'), 1000);
-                }
-            }, 5000);
-        }
-
-        // Quick view for universe ID 903807016
-        async function quickView() {
-            const universeId = '903807016';
-            startCounterUpdates(universeId);
-        }
-
-        // Get Universe ID from Place ID
-        async function getUniverseIdFromPlace() {
-            const placeId = document.getElementById('placeIdInput').value;
-            if (placeId) {
-                try {
-                    const response = await fetch(`https://apis.roblox.com/universes/v1/places/${placeId}/universe`);
-                    const data = await response.json();
-                    document.getElementById('universeIdInput').value = data.universeId;
-                } catch (error) {
-                    console.error("Error fetching universe ID:", error);
-                }
-            }
-        }
-
-        // Quick view as default
-        quickView();
-    </script>
+    <div class="container">
+        <h1>Roblox Live Visit Count</h1>
+        <input type="text" id="placeId" placeholder="Enter Place ID" />
+        <button id="getUniverseId">Get Universe ID</button>
+        <div id="universeInfo" class="hidden">
+            <p><strong>Universe ID:</strong> <span id="universeId"></span></p>
+            <p><strong>Live Visits:</strong> <span id="liveVisits">Loading...</span></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
